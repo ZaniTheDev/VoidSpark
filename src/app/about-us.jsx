@@ -3,7 +3,7 @@
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import murifaiy from "../../public/images/murifaiy.png";
+import murifaiy from "../../public/images/murifaiy1.png";
 import fullLogo from "../../public/images/voidspark-full-logo.png";
 
 gsap.registerPlugin(ScrollTrigger);
