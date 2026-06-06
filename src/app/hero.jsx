@@ -112,13 +112,15 @@ export default function VoidSparkHero() {
           </p>
 
           <div className="vs-cta flex flex-wrap items-center gap-4 opacity-0 will-change-transform">
-            <button
-              ref={primaryBtnRef}
-              type="button"
-              className="inline-flex items-center gap-2.5 rounded-full bg-neutral-900 px-8 py-4 text-sm font-medium text-white transition-colors duration-200 hover:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:ring-offset-2 focus:ring-offset-neutral-50"
-            >
-              Get started →
-            </button>
+            <a href="">
+              <button
+                ref={primaryBtnRef}
+                type="button"
+                className="inline-flex items-center gap-2.5 rounded-full bg-neutral-900 px-8 py-4 text-sm font-medium text-white transition-colors duration-200 hover:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:ring-offset-2 focus:ring-offset-neutral-50"
+              >
+                Get started →
+              </button>
+            </a>
 
             <button
               ref={secondaryBtnRef}

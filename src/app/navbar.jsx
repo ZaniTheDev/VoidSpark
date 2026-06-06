@@ -11,6 +11,11 @@ const navItems = [
   { label: "Our Team", href: "#" },
 ];
 
+// WhatsApp configuration
+const WHATSAPP_NUMBER = "6285813495425"; // Replace with your actual WhatsApp number
+const WHATSAPP_MESSAGE =
+  "Halo VoidSpark, saya ingin bertanya tentang layanan editing/website";
+
 const MenuIcon = () => (
   <svg width="20" height="14" viewBox="0 0 18 12" fill="currentColor">
     <rect y="0" width="18" height="1.5" rx="0.75" />
@@ -40,6 +45,14 @@ export default function AppleNavbar() {
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const openWhatsApp = () => {
+    const encodedMessage = encodeURIComponent(WHATSAPP_MESSAGE);
+    window.open(
+      `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`,
+      "_blank",
+    );
+  };
 
   return (
     <div className="bg-white">
@@ -89,10 +102,15 @@ export default function AppleNavbar() {
 
             <div className="absolute right-0 flex items-center h-full">
               <button
+                onClick={openWhatsApp}
                 className="flex items-center justify-center w-10 h-11 text-[#1d1d1f] hover:text-[#6e6e73] transition-colors duration-150"
-                aria-label="Shopping bag"
+                aria-label="Customer Service"
               >
-                <Image src={CustomerService} alt="" className="w-7 h-7" />
+                <Image
+                  src={CustomerService}
+                  alt="Customer Service"
+                  className="w-7 h-7"
+                />
               </button>
             </div>
           </div>
@@ -108,8 +126,9 @@ export default function AppleNavbar() {
             </Link>
             <div className="flex items-center gap-2">
               <button
+                onClick={openWhatsApp}
                 className="flex items-center justify-center w-9 h-11 text-[#1d1d1f]"
-                aria-label="Bag"
+                aria-label="Customer Service"
               >
                 <Image
                   src={CustomerService}
