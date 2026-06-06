@@ -4,6 +4,15 @@ import { useState, useEffect } from "react";
 import logo from "../../public/images/voidspark-logo.png";
 import Image from "next/image";
 import CustomerService from "../../public/images/customer-service.svg";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 const navItems = [
   { label: "About us", href: "/#about" },
@@ -39,12 +48,32 @@ export default function AppleNavbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    const controlNavbar = () => {
+      const currentScrollY = window.scrollY;
+
+      // Scrolling down
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        setIsVisible(false);
+      }
+      // Scrolling up
+      else if (currentScrollY < lastScrollY) {
+        setIsVisible(true);
+      }
+
+      setLastScrollY(currentScrollY);
+      setScrolled(currentScrollY > 10);
+    };
+
+    window.addEventListener("scroll", controlNavbar);
+
+    // Cleanup listener on component unmount
+    return () => window.removeEventListener("scroll", controlNavbar);
+  }, [lastScrollY]);
 
   const openWhatsApp = () => {
     const encodedMessage = encodeURIComponent(WHATSAPP_MESSAGE);
@@ -52,12 +81,19 @@ export default function AppleNavbar() {
       `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`,
       "_blank",
     );
+    setIsModalOpen(false);
+  };
+
+  const handleCustomerServiceClick = () => {
+    setIsModalOpen(true);
   };
 
   return (
     <div className="bg-white">
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out ${
+          isVisible ? "translate-y-0" : "-translate-y-full"
+        } ${
           scrolled
             ? "bg-[rgba(255,255,255,0.85)] backdrop-blur-xl border-b border-black/10 shadow-sm"
             : "bg-[rgba(255,255,255,0.85)] backdrop-blur-xl"
@@ -102,7 +138,7 @@ export default function AppleNavbar() {
 
             <div className="absolute right-0 flex items-center h-full">
               <button
-                onClick={openWhatsApp}
+                onClick={handleCustomerServiceClick}
                 className="flex items-center justify-center w-10 h-11 text-[#1d1d1f] hover:text-[#6e6e73] transition-colors duration-150"
                 aria-label="Customer Service"
               >
@@ -126,7 +162,7 @@ export default function AppleNavbar() {
             </Link>
             <div className="flex items-center gap-2">
               <button
-                onClick={openWhatsApp}
+                onClick={handleCustomerServiceClick}
                 className="flex items-center justify-center w-9 h-11 text-[#1d1d1f]"
                 aria-label="Customer Service"
               >
@@ -191,6 +227,43 @@ export default function AppleNavbar() {
           </div>
         </div>
       </nav>
+
+      {/* WhatsApp Confirmation Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Contact Customer Service</DialogTitle>
+            <DialogDescription>
+              You will be redirected to WhatsApp to chat with our customer
+              service team.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center justify-center py-4">
+            <div className="bg-green-50 rounded-full p-4">
+              <Image
+                src={CustomerService}
+                alt="Customer Service"
+                className="w-12 h-12 text-green-600"
+              />
+            </div>
+          </div>
+          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setIsModalOpen(false)}
+              className="sm:flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={openWhatsApp}
+              className="sm:flex-1 bg-green-600 hover:bg-green-700"
+            >
+              Continue to WhatsApp
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

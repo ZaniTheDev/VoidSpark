@@ -112,7 +112,7 @@ export default function VoidSparkHero() {
           </p>
 
           <div className="vs-cta flex flex-wrap items-center gap-4 opacity-0 will-change-transform">
-            <a href="">
+            <a href="/services">
               <button
                 ref={primaryBtnRef}
                 type="button"
