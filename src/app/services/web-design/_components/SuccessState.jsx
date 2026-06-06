@@ -1,7 +1,8 @@
-import { Check, CheckCircle2 } from "lucide-react";
+// SuccessState.jsx
+import { Check, CheckCircle2, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
-export function SuccessState() {
+export function SuccessState({ onContinue }) {
   const [invoiceNumber, setInvoiceNumber] = useState("");
 
   useEffect(() => {
@@ -26,10 +27,21 @@ export function SuccessState() {
         Kami akan meninjau brief Anda dan menghubungi dalam 1×24 jam melalui
         email atau WhatsApp.
       </p>
-      <div className="inline-flex items-center gap-2 text-xs text-black/35 bg-black/5 px-4 py-2 rounded-full">
+      <div className="inline-flex items-center gap-2 text-xs text-black/35 bg-black/5 px-4 py-2 rounded-full mb-6">
         <CheckCircle2 size={12} />
         Simpan nomor invoice untuk referensi
       </div>
+
+      {/* Add continue button */}
+      {onContinue && (
+        <button
+          onClick={onContinue}
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-black hover:bg-black/80 transition-all"
+        >
+          Lanjut ke Pembayaran
+          <ChevronRight size={14} />
+        </button>
+      )}
     </div>
   );
 }

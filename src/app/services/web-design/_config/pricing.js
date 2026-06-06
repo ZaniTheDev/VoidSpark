@@ -16,7 +16,7 @@ export const pricingPlans = [
   {
     id: "pro",
     name: "Pro",
-    price: "Rp 850000",
+    price: "Rp 850.000",
     duration: "7–10 hari kerja",
     features: [
       "Hingga 5 halaman",

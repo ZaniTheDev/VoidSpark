@@ -31,43 +31,40 @@ const steps = [
 export function StepsGuide({ stepsRef, sectionRefs }) {
   return (
     <section>
-      <div ref={(el) => (sectionRefs.current[0] = el)} className="mb-8">
-        <p className="text-[11px] uppercase tracking-[0.18em] text-black/35 mb-2">
+      <div ref={(el) => (sectionRefs.current[0] = el)} className="mb-5">
+        <p className="text-[10px] uppercase tracking-[0.16em] text-black/35 mb-1.5">
           Panduan
         </p>
         <h2
-          className="text-2xl font-semibold tracking-tight"
+          className="text-xl font-semibold tracking-tight"
           style={{ letterSpacing: "-0.02em" }}
         >
           Cara Pemesanan
         </h2>
-        <p className="text-sm text-black/45 mt-1.5">
+        <p className="text-xs text-black/45 mt-1">
           Ikuti langkah berikut untuk memesan website impian Anda.
         </p>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         {steps.map((step, i) => (
           <div
             key={step.no}
             ref={(el) => (stepsRef.current[i] = el)}
-            className="flex gap-5 p-5 rounded-2xl border border-black/7 bg-black/[0.015] hover:bg-black/[0.03] transition-colors duration-200"
+            className="flex gap-3 p-3 rounded-xl border border-black/7 bg-black/[0.015] hover:bg-black/[0.03] transition-colors duration-200"
           >
-            <span className="text-[11px] font-semibold text-black/25 mt-0.5 w-5 shrink-0">
+            <span className="text-[10px] font-semibold text-black/25 mt-0.5 w-4 shrink-0">
               {step.no}
             </span>
-            <div>
-              <p className="text-sm font-semibold text-black mb-0.5">
+            <div className="flex-1">
+              <p className="text-xs font-semibold text-black mb-0.5">
                 {step.title}
               </p>
-              <p className="text-sm text-black/50 leading-relaxed">
+              <p className="text-xs text-black/50 leading-relaxed">
                 {step.desc}
               </p>
             </div>
-            <ChevronRight
-              size={16}
-              className="ml-auto text-black/20 shrink-0 mt-0.5"
-            />
+            <ChevronRight size={14} className="text-black/20 shrink-0 mt-0.5" />
           </div>
         ))}
       </div>

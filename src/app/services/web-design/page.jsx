@@ -10,9 +10,10 @@ import { ContactStep } from "./_components/ContactStep";
 import { PaymentInfo } from "./_components/PaymentInfo";
 import { StepsGuide } from "./_components/StepsGuide";
 import { SuccessState } from "./_components/SuccessState";
-import { Header } from "./_components/Header";
+
 import { Footer } from "./_components/Footer";
 import { pricingPlans } from "./_config/pricing";
+import Navbar from "../../navbar";
 
 export default function OrderPage() {
   const {
@@ -37,7 +38,7 @@ export default function OrderPage() {
   } = useScrollAnimations();
 
   const renderStep = () => {
-    if (submitted) return <SuccessState />;
+    if (submitted) return null; // Don't show form steps when submitted
 
     switch (step) {
       case 1:
@@ -78,7 +79,7 @@ export default function OrderPage() {
       ref={pageRef}
       className="min-h-screen bg-white text-black font-sans antialiased overflow-x-hidden"
     >
-      <Header ref={headerRef} />
+      <Navbar />
 
       <main className="max-w-3xl mx-auto px-6 py-12 space-y-20">
         <StepsGuide stepsRef={stepsRef} sectionRefs={sectionRefs} />
@@ -110,25 +111,25 @@ export default function OrderPage() {
           </div>
         </section>
 
-        {/* Form Section */}
-        <section>
-          <div ref={(el) => (sectionRefs.current[2] = el)} className="mb-8">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-black/35 mb-2">
-              Langkah 2
-            </p>
-            <h2
-              className="text-2xl font-semibold tracking-tight"
-              style={{ letterSpacing: "-0.02em" }}
-            >
-              Formulir Desain
-            </h2>
-            <p className="text-sm text-black/45 mt-1.5">
-              Ceritakan visi desain Anda kepada kami.
-            </p>
-          </div>
+        {/* Form Section - Only show if not submitted */}
+        {!submitted && (
+          <section>
+            <div ref={(el) => (sectionRefs.current[2] = el)} className="mb-8">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-black/35 mb-2">
+                Langkah 2
+              </p>
+              <h2
+                className="text-2xl font-semibold tracking-tight"
+                style={{ letterSpacing: "-0.02em" }}
+              >
+                Formulir Desain
+              </h2>
+              <p className="text-sm text-black/45 mt-1.5">
+                Ceritakan visi desain Anda kepada kami.
+              </p>
+            </div>
 
-          <div ref={formRef}>
-            {!submitted && (
+            <div ref={formRef}>
               <div className="rounded-2xl border border-black/10 overflow-hidden">
                 <StepIndicator
                   step={step}
@@ -136,32 +137,57 @@ export default function OrderPage() {
                 />
                 <div className="p-8 space-y-7">{renderStep()}</div>
               </div>
-            )}
-            {submitted && <SuccessState />}
-          </div>
-        </section>
+            </div>
+          </section>
+        )}
 
-        {/* Payment Section */}
-        <section>
-          <div ref={(el) => (sectionRefs.current[3] = el)} className="mb-8">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-black/35 mb-2">
-              Langkah 3
-            </p>
-            <h2
-              className="text-2xl font-semibold tracking-tight"
-              style={{ letterSpacing: "-0.02em" }}
-            >
-              Informasi Pembayaran
-            </h2>
-            <p className="text-sm text-black/45 mt-1.5">
-              Transfer setelah brief diterima dan invoice dikirimkan.
-            </p>
-          </div>
+        {/* Success State - Show when submitted */}
+        {submitted && (
+          <section>
+            <div ref={(el) => (sectionRefs.current[2] = el)} className="mb-8">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-black/35 mb-2">
+                Langkah 2
+              </p>
+              <h2
+                className="text-2xl font-semibold tracking-tight"
+                style={{ letterSpacing: "-0.02em" }}
+              >
+                Brief Terkirim!
+              </h2>
+              <p className="text-sm text-black/45 mt-1.5">
+                Terima kasih telah mengirimkan brief desain Anda.
+              </p>
+            </div>
 
-          <div ref={payRef}>
-            <PaymentInfo />
-          </div>
-        </section>
+            <div ref={formRef}>
+              <SuccessState />
+            </div>
+          </section>
+        )}
+
+        {/* Payment Section - Only show after success state */}
+        {submitted && (
+          <section>
+            <div ref={(el) => (sectionRefs.current[3] = el)} className="mb-8">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-black/35 mb-2">
+                Langkah 3
+              </p>
+              <h2
+                className="text-2xl font-semibold tracking-tight"
+                style={{ letterSpacing: "-0.02em" }}
+              >
+                Informasi Pembayaran
+              </h2>
+              <p className="text-sm text-black/45 mt-1.5">
+                Transfer setelah brief diterima dan invoice dikirimkan.
+              </p>
+            </div>
+
+            <div ref={payRef}>
+              <PaymentInfo />
+            </div>
+          </section>
+        )}
       </main>
 
       <Footer />
