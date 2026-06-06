@@ -3,7 +3,7 @@
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import skirkImage from "../../public/images/skirk.png";
+import murifaiy from "../../public/images/murifaiy.png";
 import fullLogo from "../../public/images/voidspark-full-logo.png";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -153,7 +153,7 @@ export default function VoidSparkAbout() {
             {/* RIGHT PANEL — image */}
             <div ref={rightPanelRef} className="flex will-change-transform">
               <img
-                src={skirkImage.src}
+                src={murifaiy.src}
                 alt="image"
                 className="va-image object-contain w-80 mx-auto block lg:w-200"
               />
