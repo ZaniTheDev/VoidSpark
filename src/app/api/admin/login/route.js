@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
-// Hardcoded for testing (remove in production!)
+// Hardcoded for testing 
 const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "admin123"; // Plain text password
+const ADMIN_PASSWORD = "admin123"; 
 
 export async function POST(request) {
   try {

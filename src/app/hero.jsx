@@ -122,13 +122,15 @@ export default function VoidSparkHero() {
               </button>
             </a>
 
-            <button
-              ref={secondaryBtnRef}
-              type="button"
-              className="inline-flex items-center gap-2 rounded-full border border-neutral-300 bg-white/60 px-8 py-4 text-sm font-medium text-neutral-900 backdrop-blur-sm transition-all duration-200 hover:border-neutral-900 hover:bg-white focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:ring-offset-2 focus:ring-offset-neutral-50"
-            >
-              See our work
-            </button>
+            <a href="/Our-Projects">
+              <button
+                ref={secondaryBtnRef}
+                type="button"
+                className="inline-flex items-center gap-2 rounded-full border border-neutral-300 bg-white/60 px-8 py-4 text-sm font-medium text-neutral-900 backdrop-blur-sm transition-all duration-200 hover:border-neutral-900 hover:bg-white focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:ring-offset-2 focus:ring-offset-neutral-50"
+              >
+                See our work
+              </button>
+            </a>
           </div>
         </div>
       </div>
