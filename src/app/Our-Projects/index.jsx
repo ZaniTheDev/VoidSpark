@@ -2,7 +2,6 @@
 "use client";
 
 import { PortfolioProvider } from "./_Contexts/PortfolioContext";
-import BoringMeter from "./_components/BoringMeter";
 import SectionHeader from "./_components/SectionHeader";
 import Marquee from "./_components/Marquee";
 import Tabs from "./_components/Tabs";
@@ -20,7 +19,6 @@ function WorkShowcaseContent() {
   return (
     <section className="min-h-screen bg-[#f0f0ee] px-6 md:px-12 lg:px-20 py-24">
       <div className="max-w-[1100px] mx-auto">
-        <BoringMeter score={meterScore} />
         <SectionHeader />
         <Marquee />
 
