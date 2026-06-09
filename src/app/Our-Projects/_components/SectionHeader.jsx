@@ -94,8 +94,7 @@ export default function SectionHeader() {
         ref={subRef}
         className="mt-5 text-[15px] text-black/45 font-light leading-relaxed max-w-sm"
       >
-        Setiap proyek punya masalah yang harus dipecahkan. Lihat, geser, dan
-        rasakan sendiri apa yang kami ubah.
+        Berikut adalah projek - projek yang telah kami kerjakan 👀
       </p>
     </div>
   );

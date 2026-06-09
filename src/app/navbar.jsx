@@ -230,38 +230,79 @@ export default function AppleNavbar() {
 
       {/* WhatsApp Confirmation Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Contact Customer Service</DialogTitle>
-            <DialogDescription>
-              You will be redirected to WhatsApp to chat with our customer
-              service team.
+        <DialogContent className="p-0 gap-0 overflow-hidden rounded-[20px] max-w-[340px] border-0 shadow-2xl">
+          {/* Header band */}
+          <div className="bg-[#f5f5f7] px-6 pt-6 pb-5 border-b border-black/[0.08] text-center">
+            <div className="relative w-14 h-14 mx-auto mb-[14px]">
+              <div className="w-14 h-14 rounded-full bg-[#1d1d1f] flex items-center justify-center text-white text-base font-semibold tracking-wide">
+                VS
+              </div>
+              <span className="absolute bottom-[1px] right-[1px] w-[13px] h-[13px] bg-[#34c759] rounded-full border-2 border-[#f5f5f7]" />
+            </div>
+            <DialogTitle className="text-[15px] font-semibold text-[#1d1d1f] tracking-tight mb-[3px]">
+              VoidSpark Support
+            </DialogTitle>
+            <DialogDescription className="text-[12px] text-[#6e6e73]">
+              Web Design & Video Editing
             </DialogDescription>
-          </DialogHeader>
-          <div className="flex items-center justify-center py-4">
-            <div className="bg-green-50 rounded-full p-4">
-              <Image
-                src={CustomerService}
-                alt="Customer Service"
-                className="w-12 h-12 text-green-600"
-              />
+            <div className="inline-flex items-center gap-[5px] mt-2 bg-[#34c759]/[0.12] rounded-full px-[10px] py-[3px]">
+              <span className="w-[5px] h-[5px] bg-[#34c759] rounded-full" />
+              <span className="text-[11.5px] font-medium text-[#1d7a35]">
+                Online sekarang
+              </span>
             </div>
           </div>
-          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+
+          {/* Body */}
+          <div className="px-5 pt-[18px] pb-0">
+            <p className="text-[13px] text-[#3d3d3f] leading-[1.55] text-center mb-[14px]">
+              Kamu akan diarahkan ke WhatsApp untuk berbicara langsung dengan
+              tim kami.
+            </p>
+            <div className="flex items-center gap-2 bg-[#f5f5f7] rounded-[10px] px-3 py-[9px] mb-4">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#6e6e73"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              <span className="text-[12px] text-[#6e6e73]">
+                Rata-rata balas dalam{" "}
+                <strong className="text-[#1d1d1f] font-medium">~5 menit</strong>
+              </span>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="px-5 pb-5 flex flex-col gap-2">
+            <Button
+              onClick={openWhatsApp}
+              className="w-full flex items-center justify-center gap-2 bg-[#1d1d1f] hover:bg-[#333] text-white rounded-xl h-[46px] text-[14px] font-medium tracking-tight border-0"
+            >
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347" />
+              </svg>
+              Chat di WhatsApp
+            </Button>
             <Button
               variant="outline"
               onClick={() => setIsModalOpen(false)}
-              className="sm:flex-1"
+              className="w-full h-[42px] rounded-xl text-[13.5px] text-[#6e6e73] hover:text-[#1d1d1f] border-black/[0.14]"
             >
-              Cancel
+              Batal
             </Button>
-            <Button
-              onClick={openWhatsApp}
-              className="sm:flex-1 bg-green-600 hover:bg-green-700"
-            >
-              Continue to WhatsApp
-            </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
