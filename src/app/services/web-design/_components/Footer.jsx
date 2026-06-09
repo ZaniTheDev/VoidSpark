@@ -8,7 +8,7 @@ export function Footer() {
         <p className="text-xs text-black/35">
           Ada pertanyaan?{" "}
           <a
-            href="https://wa.me/6281234567890"
+            href="https://wa.me/6285813495425"
             className="text-black underline underline-offset-2"
           >
             Hubungi kami

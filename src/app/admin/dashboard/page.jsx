@@ -1,31 +1,60 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { pricingPlans } from "@/app/services/web-design/_config/pricing";
+
+const STATUS_OPTIONS = ["PENDING", "REVIEWED", "IN_PROGRESS", "COMPLETED"];
+
+const STATUS_BADGE_COLORS = {
+  PENDING: "bg-yellow-100 text-yellow-800",
+  REVIEWED: "bg-blue-100 text-blue-800",
+  IN_PROGRESS: "bg-purple-100 text-purple-800",
+  COMPLETED: "bg-green-100 text-green-800",
+};
+
+const PACKAGE_PRICES = pricingPlans.reduce((prices, plan) => {
+  prices[plan.id] = Number(plan.price.replace(/\D/g, ""));
+  return prices;
+}, {});
+
+const formatStatusLabel = (status) => status.replace("_", " ");
+
+const normalizeWhatsAppNumber = (number = "") => {
+  const digits = number.replace(/\D/g, "");
+
+  if (digits.startsWith("0")) {
+    return `62${digits.slice(1)}`;
+  }
+
+  return digits;
+};
 
 export default function AdminDashboard() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    total: 0,
-    pending: 0,
-    completed: 0,
-    totalRevenue: 0,
-  });
+  const [error, setError] = useState("");
+  const [updatingOrderId, setUpdatingOrderId] = useState("");
+  const [deletingOrderId, setDeletingOrderId] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState(null);
   const router = useRouter();
 
-  useEffect(() => {
-    const token = localStorage.getItem("adminToken");
-    if (!token) {
-      router.push("/admin/login");
-      return;
-    }
-    fetchOrders();
-  }, []);
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
+      setError("");
       const token = localStorage.getItem("adminToken");
+      if (!token) {
+        router.push("/admin/login");
+        return;
+      }
+
       const response = await fetch("/api/admin/orders", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -35,41 +64,49 @@ export default function AdminDashboard() {
       if (response.ok) {
         const data = await response.json();
         setOrders(data);
-        calculateStats(data);
       } else {
         router.push("/admin/login");
       }
     } catch (error) {
       console.error("Error fetching orders:", error);
+      setError("Could not load orders. Please try again.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
 
-  const calculateStats = (ordersData) => {
-    const pending = ordersData.filter((o) => o.status === "PENDING").length;
-    const completed = ordersData.filter((o) => o.status === "COMPLETED").length;
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchOrders();
+  }, [fetchOrders]);
 
-    // Calculate revenue based on package prices
-    const prices = {
-      starter: 1500000,
-      pro: 3500000,
-      business: 6500000,
-    };
-    const totalRevenue = ordersData.reduce((sum, order) => {
-      return sum + (prices[order.paket] || 0);
+  const stats = useMemo(() => {
+    const pending = orders.filter((o) => o.status === "PENDING").length;
+    const completed = orders.filter((o) => o.status === "COMPLETED").length;
+    const totalRevenue = orders.reduce((sum, order) => {
+      if (order.status !== "COMPLETED") {
+        return sum;
+      }
+
+      return sum + (PACKAGE_PRICES[order.paket] || 0);
     }, 0);
 
-    setStats({
-      total: ordersData.length,
+    return {
+      total: orders.length,
       pending,
       completed,
       totalRevenue,
-    });
-  };
+    };
+  }, [orders]);
 
   const updateStatus = async (orderId, status) => {
+    if (!STATUS_OPTIONS.includes(status)) {
+      alert("Invalid order status");
+      return;
+    }
+
     try {
+      setUpdatingOrderId(orderId);
       const token = localStorage.getItem("adminToken");
       const response = await fetch("/api/admin/orders", {
         method: "PUT",
@@ -81,29 +118,57 @@ export default function AdminDashboard() {
       });
 
       if (response.ok) {
-        fetchOrders(); // Refresh the list
+        await fetchOrders();
       } else {
         alert("Failed to update status");
       }
     } catch (error) {
       console.error("Error updating status:", error);
       alert("Error updating status");
+    } finally {
+      setUpdatingOrderId("");
+    }
+  };
+
+  const deleteOrder = async (order) => {
+    const confirmed = window.confirm(
+      `Delete order ${order.invoiceNumber}? This action cannot be undone.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setDeletingOrderId(order.id);
+      const token = localStorage.getItem("adminToken");
+      const response = await fetch("/api/admin/orders", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ orderId: order.id }),
+      });
+
+      if (response.ok) {
+        if (selectedOrder?.id === order.id) {
+          setSelectedOrder(null);
+        }
+        await fetchOrders();
+      } else {
+        alert("Failed to delete order");
+      }
+    } catch (error) {
+      console.error("Error deleting order:", error);
+      alert("Error deleting order");
+    } finally {
+      setDeletingOrderId("");
     }
   };
 
   const getStatusBadgeColor = (status) => {
-    switch (status) {
-      case "PENDING":
-        return "bg-yellow-100 text-yellow-800";
-      case "REVIEWED":
-        return "bg-blue-100 text-blue-800";
-      case "IN_PROGRESS":
-        return "bg-purple-100 text-purple-800";
-      case "COMPLETED":
-        return "bg-green-100 text-green-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
+    return STATUS_BADGE_COLORS[status] || "bg-gray-100 text-gray-800";
   };
 
   const formatPrice = (price) => {
@@ -147,6 +212,18 @@ export default function AdminDashboard() {
       </header>
 
       <div className="p-8">
+        {error && (
+          <div className="mb-6 flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <span>{error}</span>
+            <button
+              onClick={fetchOrders}
+              className="font-medium text-red-800 hover:text-red-950"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
@@ -227,45 +304,48 @@ export default function AdminDashboard() {
                       <select
                         value={order.status}
                         onChange={(e) => updateStatus(order.id, e.target.value)}
+                        disabled={updatingOrderId === order.id}
                         className={`px-3 py-1 rounded-full text-xs font-semibold cursor-pointer ${getStatusBadgeColor(order.status)} border-0 focus:ring-2 focus:ring-black`}
                       >
-                        <option value="PENDING">PENDING</option>
-                        <option value="REVIEWED">REVIEWED</option>
-                        <option value="IN_PROGRESS">IN PROGRESS</option>
-                        <option value="COMPLETED">COMPLETED</option>
+                        {STATUS_OPTIONS.map((status) => (
+                          <option key={status} value={status}>
+                            {formatStatusLabel(status)}
+                          </option>
+                        ))}
                       </select>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
-                      {new Date(order.createdAt).toLocaleDateString("id-ID")}
+                      {new Date(order.createdAt).toLocaleString("id-ID", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
                         <button
-                          onClick={() => {
-                            const details = `
-Order Details:
-Invoice: ${order.invoiceNumber}
-Customer: ${order.nama}
-Package: ${order.paket}
-Style: ${order.style}
-Mood: ${order.mood?.join(", ")}
-Pages: ${order.halaman}
-Notes: ${order.referensi || "-"}
-                            `.trim();
-                            alert(details);
-                          }}
+                          onClick={() => setSelectedOrder(order)}
+                          disabled={deletingOrderId === order.id}
                           className="text-blue-600 hover:text-blue-800 text-sm"
                         >
                           View
                         </button>
                         <a
-                          href={`https://wa.me/${order.wa}`}
+                          href={`https://wa.me/${normalizeWhatsAppNumber(order.wa)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-green-600 hover:text-green-800 text-sm"
                         >
                           WhatsApp
                         </a>
+                        <button
+                          onClick={() => deleteOrder(order)}
+                          disabled={deletingOrderId === order.id}
+                          className="text-red-600 hover:text-red-800 disabled:text-red-300 text-sm"
+                        >
+                          {deletingOrderId === order.id
+                            ? "Deleting..."
+                            : "Delete"}
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -281,6 +361,103 @@ Notes: ${order.referensi || "-"}
           )}
         </div>
       </div>
+
+      <Dialog
+        open={Boolean(selectedOrder)}
+        onOpenChange={() => setSelectedOrder(null)}
+      >
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Order Details</DialogTitle>
+            <DialogDescription>
+              {selectedOrder?.invoiceNumber || "Selected order"}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedOrder && (
+            <div className="grid gap-4 text-sm">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-gray-500">Customer</p>
+                  <p className="font-medium text-gray-900">
+                    {selectedOrder.nama}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Status</p>
+                  <p className="font-medium text-gray-900">
+                    {formatStatusLabel(selectedOrder.status)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Email</p>
+                  <p className="font-medium text-gray-900 break-all">
+                    {selectedOrder.email}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500">WhatsApp</p>
+                  <p className="font-medium text-gray-900">
+                    {selectedOrder.wa}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Package</p>
+                  <p className="font-medium text-gray-900 capitalize">
+                    {selectedOrder.paket}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Price</p>
+                  <p className="font-medium text-gray-900">
+                    {formatPrice(PACKAGE_PRICES[selectedOrder.paket] || 0)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Style</p>
+                  <p className="font-medium text-gray-900">
+                    {selectedOrder.style}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Pages</p>
+                  <p className="font-medium text-gray-900">
+                    {selectedOrder.halaman}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Palette</p>
+                  <p className="font-medium text-gray-900">
+                    {selectedOrder.palette}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Payment</p>
+                  <p className="font-medium text-gray-900">
+                    {selectedOrder.paymentStatus || "UNPAID"}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-gray-500">Mood</p>
+                <p className="font-medium text-gray-900">
+                  {selectedOrder.mood?.length
+                    ? selectedOrder.mood.join(", ")
+                    : "-"}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-gray-500">Notes</p>
+                <p className="whitespace-pre-wrap font-medium text-gray-900">
+                  {selectedOrder.referensi || "-"}
+                </p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

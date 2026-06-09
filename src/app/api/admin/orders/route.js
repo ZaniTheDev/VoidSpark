@@ -42,3 +42,21 @@ export async function PUT(request) {
 
   return NextResponse.json(order);
 }
+
+export async function DELETE(request) {
+  const user = verifyToken(request);
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { orderId } = await request.json();
+  if (!orderId) {
+    return NextResponse.json({ error: "Order ID is required" }, { status: 400 });
+  }
+
+  await prisma.order.delete({
+    where: { id: orderId },
+  });
+
+  return NextResponse.json({ success: true });
+}

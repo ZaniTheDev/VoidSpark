@@ -133,7 +133,7 @@ export function PaymentInfo() {
           WhatsApp kami.
         </p>
         <a
-          href="https://wa.me/6281234567890?text=Halo,%20saya%20sudah%20transfer%20untuk%20order%20website"
+          href="https://wa.me/6285813495425?text=Halo,%20saya%20sudah%20transfer%20untuk%20order%20website"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-black hover:bg-black/80 transition-all"
