@@ -1,34 +1,36 @@
 // src/data/portfolioData.js
-export const CASES = [
+export const ourWorkProjects = [
   {
-    id: "01",
-    mission: "Misi 01",
-    tag: "Web Design",
-    title:
-      "Selamatkan toko kopi yang kehilangan 60% pelanggan karena website-nya terlihat seperti dibuat tahun 2009.",
-    desc: "Menu tidak bisa di-scroll di HP, tombol pesan error, dan foto produk blur. Kami rebuild dari nol dalam 5 hari.",
-    location: "Jakarta · 2025",
-    large: true,
+    id: 1,
+    title: "Short Form Content",
+    description: "Membuat konten edukasi short form",
+    category: "Editing",
+    service: "Editing",
+    image: "/images/editing.png",
+    year: "2025",
+    featured: true,
   },
+
   {
-    id: "02",
-    mission: "Misi 02",
-    tag: "Branding",
-    title:
-      "Brand studio arsitektur butik yang terlihat lebih tua dari gedung yang mereka desain.",
-    desc: "Logo pixelated, warna tidak konsisten. Sekarang: identitas visual yang bikin klien korporat percaya.",
-    location: "Bandung · 2025",
-    large: false,
+    id: 2,
+    title: "E-Commerce Platform",
+    description: "Membuat website E-Commerce yang menjual subscription kopi",
+    category: "Website",
+    service: "UX Design & Development",
+    image: "/images/websiteKopi.png",
+    year: "2024",
+    featured: false,
   },
+
   {
-    id: "03",
-    mission: "Misi 03",
-    tag: "Editing Video",
-    title:
-      "Konten podcast yang bagus isinya, tapi ditonton 200 orang karena editingnya membosankan.",
-    desc: "Reformat jadi short-form clips dengan caption dynamic. Views naik 12x dalam 3 minggu.",
-    location: "Surabaya · 2024",
-    large: false,
+    id: 3,
+    title: "Website Sekolah",
+    description: "Membuat website sekolah yang dilengkapi dengan sistem CMS",
+    category: "Education",
+    service: "Website",
+    image: "/images/website-bani-adna.png",
+    year: "2025",
+    featured: false,
   },
 ];
 

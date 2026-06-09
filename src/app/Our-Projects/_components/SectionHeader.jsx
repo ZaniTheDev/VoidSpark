@@ -68,7 +68,7 @@ export default function SectionHeader() {
 
       <div ref={headRef} className="overflow-hidden">
         <div className="flex flex-wrap gap-x-4">
-          {["Hasil", "Nyata,"].map((w) => (
+          {["View", "Our"].map((w) => (
             <span
               key={w}
               className="w inline-block font-black tracking-tight leading-[.95] text-black"
@@ -85,7 +85,7 @@ export default function SectionHeader() {
               fontSize: "clamp(3rem,8vw,5.5rem)",
             }}
           >
-            Bukan Janji.
+            Projects
           </span>
         </div>
       </div>

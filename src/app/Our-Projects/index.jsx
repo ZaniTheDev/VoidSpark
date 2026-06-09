@@ -4,11 +4,10 @@
 import { PortfolioProvider } from "./_Contexts/PortfolioContext";
 import SectionHeader from "./_components/SectionHeader";
 import Marquee from "./_components/Marquee";
-import Tabs from "./_components/Tabs";
 import CaseCard from "./_components/CaseCard";
 import BeforeAfterSlider from "./_components/BeforeAfterSlider";
 import HotspotView from "./_components/HotspotView";
-import { CASES, TABS as TAB_NAMES } from "./_Data/PortofolioData.js";
+import { ourWorkProjects } from "./_Data/PortofolioData.js";
 import { usePortfolio } from "./_Contexts/PortfolioContext";
 import { useScrollReveal } from "./_Hooks/useGsapAnimations";
 
@@ -22,14 +21,12 @@ function WorkShowcaseContent() {
         <SectionHeader />
         <Marquee />
 
-        <Tabs tabs={TAB_NAMES} />
-
         {activeTab === 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {CASES.map((c, i) => (
+            {ourWorkProjects.map((project, i) => (
               <CaseCard
-                key={c.id}
-                data={c}
+                key={project.id}
+                project={project}
                 index={i}
                 onHover={updateMeterScore}
               />
