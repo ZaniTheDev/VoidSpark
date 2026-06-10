@@ -18,6 +18,8 @@ export default function VoidSparkAbout() {
   const logoRevealRef = useRef(null);
   const playBtnRef = useRef(null);
   const videoStarted = useRef(false);
+  const unmuteRef = useRef(null);
+
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
       const isDesktop = window.innerWidth >= 1024;
@@ -123,38 +125,26 @@ export default function VoidSparkAbout() {
                 const video = logoRef.current;
                 if (!video) return;
 
-                const attemptPlay = () => {
-                  video.currentTime = 0;
-                  video.muted = true;
-                  video
-                    .play()
-                    .then(() => {
-                      gsap.to(unmuteRef.current, { opacity: 1, duration: 0.3 });
-                      video.onended = () => {
-                        gsap.to(unmuteRef.current, {
-                          opacity: 0,
-                          duration: 0.3,
-                        });
-                        gsap.to(logoRevealRef.current, {
-                          opacity: 1,
-                          duration: 0.8,
-                          ease: "expo.out",
-                        });
-                      };
-                    })
-                    .catch((err) => console.error("play blocked:", err));
-                };
+                // Just show the buttons, don't autoplay
+                gsap.to(unmuteRef.current, { opacity: 1, duration: 0.3 });
+                gsap.to(playBtnRef.current, { opacity: 1, duration: 0.3 });
 
-                // readyState 4 = HAVE_ENOUGH_DATA (fully ready)
-                // readyState 3 = HAVE_FUTURE_DATA (enough to play)
-                if (video.readyState >= 3) {
-                  attemptPlay();
-                } else {
-                  // Not ready yet — wait for it
-                  video.addEventListener("canplay", attemptPlay, {
-                    once: true,
+                // Set up the ended event handler for when user finishes playing
+                video.onended = () => {
+                  gsap.to(unmuteRef.current, {
+                    opacity: 0,
+                    duration: 0.3,
                   });
-                }
+                  gsap.to(playBtnRef.current, {
+                    opacity: 0,
+                    duration: 0.3,
+                  });
+                  gsap.to(logoRevealRef.current, {
+                    opacity: 1,
+                    duration: 0.8,
+                    ease: "expo.out",
+                  });
+                };
               },
             },
             0.45,
@@ -231,8 +221,7 @@ export default function VoidSparkAbout() {
               preload="auto"
               muted
               playsInline
-              loop={false}
-              className="w-[840px] object-contain rounded-2xl"
+              className="w-[740px] object-contain rounded-2xl"
             />
 
             <button
@@ -240,16 +229,26 @@ export default function VoidSparkAbout() {
               onClick={() => {
                 const video = logoRef.current;
                 if (!video) return;
+
                 if (video.paused) {
+                  // Unmute and play
                   video.muted = false;
-                  video.play();
-                  playBtnRef.current.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-          <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
-        </svg>
-        <span>Pause</span>
-      `;
+                  video
+                    .play()
+                    .then(() => {
+                      // Video is playing
+                      playBtnRef.current.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+              <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
+            </svg>
+            <span>Pause</span>
+          `;
+                      // Hide unmute button since video is already unmuted
+                      gsap.to(unmuteRef.current, { opacity: 0, duration: 0.3 });
+                    })
+                    .catch((err) => console.error("play failed:", err));
                 } else {
+                  // Pause the video
                   video.pause();
                   playBtnRef.current.innerHTML = `
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
@@ -273,15 +272,7 @@ export default function VoidSparkAbout() {
               </svg>
               <span>Play</span>
             </button>
-
             {/* Logo fades in after video ends */}
-            <img
-              ref={logoRevealRef}
-              src={fullLogo.src}
-              alt="VoidSpark"
-              className="absolute w-2xl object-contain"
-              style={{ opacity: 0 }}
-            />
           </div>
         </div>
       </div>
