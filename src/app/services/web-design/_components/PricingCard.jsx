@@ -49,6 +49,13 @@ export const PricingCard = forwardRef(({ plan, isActive, onSelect }, ref) => {
         >
           {plan.price}
         </p>
+        {plan.bestFor && (
+          <p
+            className={`text-[11px] leading-snug mb-5 ${isActive ? "text-white/55" : "text-black/40"}`}
+          >
+            {plan.bestFor}
+          </p>
+        )}
         <ul className="space-y-2">
           {plan.features.map((feature) => (
             <li key={feature} className="flex items-start gap-2 text-xs">

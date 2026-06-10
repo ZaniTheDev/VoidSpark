@@ -1,9 +1,17 @@
 import { useState } from "react";
 import { Check, Copy, CircleAlert, ChevronRight } from "lucide-react";
 import { bankAccounts, qrisAccounts } from "../_config/pricing";
+import { OrderSummary } from "./orderSummary";
 
-export function PaymentInfo() {
+export function PaymentInfo({ form, order }) {
   const [copied, setCopied] = useState("");
+  const invoiceText = order?.invoiceNumber
+    ? `%0AInvoice:%20${encodeURIComponent(order.invoiceNumber)}`
+    : "";
+  const packageText = form?.paket
+    ? `%0APaket:%20${encodeURIComponent(form.paket)}`
+    : "";
+  const whatsappHref = `https://wa.me/6285813495425?text=Halo,%20saya%20sudah%20transfer%20untuk%20order%20website${invoiceText}${packageText}`;
 
   const copyRek = (val, id) => {
     navigator.clipboard.writeText(val);
@@ -11,15 +19,10 @@ export function PaymentInfo() {
     setTimeout(() => setCopied(""), 2000);
   };
 
-  // Add this copy function for QRIS
-  const copyQris = (val, id) => {
-    navigator.clipboard.writeText(val);
-    setCopied(id);
-    setTimeout(() => setCopied(""), 2000);
-  };
-
   return (
     <div className="space-y-4">
+      {form && <OrderSummary form={form} order={order} />}
+
       {/* notice */}
       <div className="flex gap-3 p-4 rounded-xl bg-black/[0.03] border border-black/8">
         <CircleAlert size={15} className="shrink-0 mt-0.5 text-black/40" />
@@ -101,17 +104,14 @@ export function PaymentInfo() {
                   className=" md:w-100 md:h-100 object-contain"
                 />
               </div>
-              <button
-                onClick={() => copyQris(account.qrisImageUrl, `qris-${i}`)}
+              <a
+                href={account.qrisImageUrl}
+                download
                 className="flex items-center gap-1.5 text-xs text-black/40 hover:text-black transition-colors px-3 py-1.5 rounded-lg hover:bg-black/5"
               >
-                {copied === `qris-${i}` ? (
-                  <Check size={13} />
-                ) : (
-                  <Copy size={13} />
-                )}
-                {copied === `qris-${i}` ? "Sedang diunduh" : "Unduh QRIS"}
-              </button>
+                <Copy size={13} />
+                Unduh QRIS
+              </a>
             </div>
             <div className="px-3.5 py-2.5 rounded-xl bg-black/[0.025] border border-black/6">
               <p className="text-[10px] text-black/35 mb-0.5">Atas Nama</p>
@@ -133,7 +133,7 @@ export function PaymentInfo() {
           WhatsApp kami.
         </p>
         <a
-          href="https://wa.me/6285813495425?text=Halo,%20saya%20sudah%20transfer%20untuk%20order%20website"
+          href={whatsappHref}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-black hover:bg-black/80 transition-all"

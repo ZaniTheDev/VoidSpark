@@ -2,7 +2,7 @@ export function NavButtons({
   onBack,
   onNext,
   disabled,
-  nextText = "Lanjutkan →",
+  nextText = "Lanjutkan ->",
 }) {
   return (
     <div className="flex gap-3 pt-1">

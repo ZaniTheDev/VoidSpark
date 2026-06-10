@@ -3,7 +3,9 @@ export const pricingPlans = [
     id: "starter",
     name: "Starter",
     price: "Rp 200.000",
-    duration: "5–7 hari kerja",
+    priceValue: 200000,
+    duration: "5-7 hari kerja",
+    bestFor: "Landing page sederhana",
     features: [
       "2 halaman landing page",
       "Desain responsif",
@@ -17,7 +19,9 @@ export const pricingPlans = [
     id: "pro",
     name: "Pro",
     price: "Rp 850.000",
-    duration: "7–10 hari kerja",
+    priceValue: 850000,
+    duration: "7-10 hari kerja",
+    bestFor: "Bisnis kecil yang siap online",
     features: [
       "Hingga 5 halaman",
       "Desain custom penuh",
@@ -33,7 +37,9 @@ export const pricingPlans = [
     id: "business",
     name: "Business",
     price: "Rp 3.500.000",
-    duration: "10–14 hari kerja",
+    priceValue: 3500000,
+    duration: "10-14 hari kerja",
+    bestFor: "Website custom dengan fitur lebih",
     features: [
       "Halaman tak terbatas",
       "Desain premium & animasi",
@@ -54,8 +60,8 @@ export const bankAccounts = [
 
 export const qrisAccounts = [
   {
-    merchant: "Warung Kopi",
+    merchant: "VoidSpark",
     atas: "VoidSpark",
-    qrisImageUrl: "/images/qris-voidspark.jpg", // or external URL
+    qrisImageUrl: "/images/qris-voidspark.jpg",
   },
 ];

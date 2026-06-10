@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useOrderForm } from "./_hooks/useOrderForm";
 import { useScrollAnimations } from "./_hooks/useScrollAnimations";
 import { StepIndicator } from "./_components/StepIndicator";
@@ -16,6 +17,7 @@ import { pricingPlans } from "./_config/pricing";
 import Navbar from "../../navbar";
 
 export default function OrderPage() {
+  const [submittedOrder, setSubmittedOrder] = useState(null);
   const {
     form,
     step,
@@ -65,7 +67,10 @@ export default function OrderPage() {
             form={form}
             updateField={updateField}
             onBack={() => setStep(2)}
-            onSubmit={() => setSubmitted(true)}
+            onSubmit={(order) => {
+              setSubmittedOrder(order);
+              setSubmitted(true);
+            }}
             canSubmit={canProceed.step3}
           />
         );
@@ -160,7 +165,7 @@ export default function OrderPage() {
             </div>
 
             <div ref={formRef}>
-              <SuccessState />
+              <SuccessState form={form} order={submittedOrder} />
             </div>
           </section>
         )}
@@ -184,7 +189,7 @@ export default function OrderPage() {
             </div>
 
             <div ref={payRef}>
-              <PaymentInfo />
+              <PaymentInfo form={form} order={submittedOrder} />
             </div>
           </section>
         )}

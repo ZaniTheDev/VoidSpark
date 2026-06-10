@@ -1,5 +1,32 @@
 import { prisma } from "@/lib/prisma";
+import { sendOrderConfirmations } from "@/lib/email";
 import { NextResponse } from "next/server";
+import { z } from "zod";
+import { pricingPlans } from "@/app/services/web-design/_config/pricing";
+import {
+  colorOptions,
+  moodOptions,
+  styleOptions,
+} from "@/app/services/web-design/_config/design-options";
+
+const validPackages = pricingPlans.map((plan) => plan.id);
+const validStyles = styleOptions.map((option) => option.id);
+const validPalettes = colorOptions.map((option) => option.name);
+
+const orderSchema = z.object({
+  nama: z.string().trim().min(2).max(100),
+  email: z.string().trim().email().max(120),
+  wa: z
+    .string()
+    .trim()
+    .regex(/^(\+62|62|0)8[0-9]{8,13}$/),
+  paket: z.enum(validPackages),
+  style: z.enum(validStyles),
+  mood: z.array(z.enum(moodOptions)).max(3).default([]),
+  palette: z.enum(validPalettes),
+  halaman: z.string().trim().min(2).max(1000),
+  referensi: z.string().trim().max(2000).optional().default(""),
+});
 
 function generateInvoiceNumber() {
   const date = new Date();
@@ -11,40 +38,29 @@ function generateInvoiceNumber() {
   return `INV-${year}${month}-${random}`;
 }
 
+function getValidationMessage(error) {
+  const firstIssue = error.issues?.[0];
+  if (!firstIssue) return "Data order tidak valid";
+
+  const field = firstIssue.path.join(".");
+  return `Field ${field} tidak valid`;
+}
+
 export async function POST(request) {
   try {
-    // Parse the JSON body
-    const data = await request.json();
+    const json = await request.json();
+    const parsed = orderSchema.safeParse(json);
 
-    // Validate required fields
-    const required = [
-      "nama",
-      "email",
-      "wa",
-      "paket",
-      "style",
-      "palette",
-      "halaman",
-    ];
-    for (const field of required) {
-      if (!data[field]) {
-        return NextResponse.json(
-          { error: `Missing field: ${field}` },
-          { status: 400 },
-        );
-      }
-    }
-
-    // Check if prisma is initialized
-    if (!prisma) {
-      console.error("Prisma not initialized");
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Database connection error" },
-        { status: 500 },
+        { error: getValidationMessage(parsed.error) },
+        { status: 400 },
       );
     }
 
-    // Create order in database
+    const data = parsed.data;
+    const selectedPlan = pricingPlans.find((plan) => plan.id === data.paket);
+
     const order = await prisma.order.create({
       data: {
         nama: data.nama,
@@ -52,31 +68,38 @@ export async function POST(request) {
         wa: data.wa,
         paket: data.paket,
         style: data.style,
-        mood: data.mood || [],
+        mood: data.mood,
         palette: data.palette,
         halaman: data.halaman,
-        referensi: data.referensi || "",
+        referensi: data.referensi,
         invoiceNumber: generateInvoiceNumber(),
       },
     });
 
-    // Return success response
+    if (process.env.RESEND_API_KEY) {
+      try {
+        await sendOrderConfirmations(order);
+      } catch (error) {
+        console.error("Order email error:", error);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       orderId: order.id,
       invoiceNumber: order.invoiceNumber,
+      totalPrice: selectedPlan?.priceValue || 0,
+      packageName: selectedPlan?.name || data.paket,
     });
   } catch (error) {
     console.error("Order creation error:", error);
-    // Always return a valid JSON response
     return NextResponse.json(
-      { error: "Failed to create order: " + error.message },
+      { error: "Gagal membuat order. Silakan coba lagi." },
       { status: 500 },
     );
   }
 }
 
-// Add OPTIONS handler for CORS if needed
 export async function OPTIONS() {
   return NextResponse.json({}, { status: 200 });
 }

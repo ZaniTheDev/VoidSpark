@@ -1,8 +1,25 @@
-export function OrderSummary({ form }) {
+import { pricingPlans } from "../_config/pricing";
+
+const formatPrice = (value) =>
+  new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(value);
+
+export function OrderSummary({ form, order }) {
+  const selectedPlan = pricingPlans.find((plan) => plan.id === form.paket);
+  const total = selectedPlan?.priceValue || order?.totalPrice || 0;
+  const downPayment = total ? total / 2 : 0;
+
   const items = [
-    ["Paket", form.paket],
+    ["Invoice", order?.invoiceNumber],
+    ["Paket", selectedPlan?.name || form.paket],
+    ["Cocok untuk", selectedPlan?.bestFor],
+    ["Harga", total ? formatPrice(total) : ""],
+    ["DP 50%", downPayment ? formatPrice(downPayment) : ""],
     ["Gaya", form.style],
-    ["Mood", form.mood.join(", ")],
+    ["Mood", form.mood?.join(", ")],
     ["Palet", form.palette],
     ["Halaman", form.halaman],
   ].filter(([, value]) => value);
@@ -16,8 +33,8 @@ export function OrderSummary({ form }) {
       </p>
       {items.map(([key, value]) => (
         <div key={key} className="flex gap-3 text-xs">
-          <span className="text-black/30 w-16 shrink-0">{key}</span>
-          <span className="text-black/70 capitalize">{value}</span>
+          <span className="text-black/30 w-20 shrink-0">{key}</span>
+          <span className="text-black/70">{value}</span>
         </div>
       ))}
     </div>
