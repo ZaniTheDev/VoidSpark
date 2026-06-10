@@ -15,7 +15,9 @@ export default function VoidSparkAbout() {
   const rightPanelRef = useRef(null);
   const logoWrapRef = useRef(null);
   const contentWrapRef = useRef(null);
-
+  const logoRevealRef = useRef(null);
+  const playBtnRef = useRef(null);
+  const videoStarted = useRef(false);
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
       const isDesktop = window.innerWidth >= 1024;
@@ -28,12 +30,11 @@ export default function VoidSparkAbout() {
       gsap.set(".va-body", { opacity: 0, y: 24 });
       gsap.set(".va-image", { opacity: 0, scale: 0.96, y: 40 });
 
-      // Only hide logo on desktop (it's not shown on mobile)
       if (isDesktop) {
         gsap.set(logoWrapRef.current, { opacity: 0, scale: 0.85 });
       }
 
-      // ── SECTION ENTER ANIMATION (runs on all breakpoints) ────────
+      // ── SECTION ENTER ANIMATION ────────────────────────────────
 
       const enterTl = gsap.timeline({
         scrollTrigger: {
@@ -69,7 +70,7 @@ export default function VoidSparkAbout() {
           0.5,
         );
 
-      // ── PINNED SPLIT + LOGO — DESKTOP ONLY ──────────────────────
+      // ── PINNED SPLIT + VIDEO — DESKTOP ONLY ───────────────────
 
       if (isDesktop) {
         const pinnedTl = gsap.timeline({
@@ -81,9 +82,25 @@ export default function VoidSparkAbout() {
             pin: true,
             anticipatePin: 1,
             pinSpacing: true,
+            onUpdate: (self) => {
+              if (self.progress >= 0.7 && !videoStarted.current) {
+                videoStarted.current = true;
+                // Just show the play button, don't auto-play
+                gsap.to(playBtnRef.current, { opacity: 1, duration: 0.4 });
+              }
+
+              if (self.progress < 0.5 && videoStarted.current) {
+                videoStarted.current = false;
+                const video = logoRef.current;
+                if (video) {
+                  video.pause();
+                  video.currentTime = 0;
+                }
+                gsap.set(playBtnRef.current, { opacity: 0 });
+              }
+            },
           },
         });
-
         pinnedTl
           .to(
             leftPanelRef.current,
@@ -97,7 +114,49 @@ export default function VoidSparkAbout() {
           )
           .to(
             logoWrapRef.current,
-            { opacity: 1, scale: 1, ease: "expo.out", duration: 0.55 },
+            {
+              opacity: 1,
+              scale: 1,
+              ease: "expo.out",
+              duration: 0.55,
+              onComplete: () => {
+                const video = logoRef.current;
+                if (!video) return;
+
+                const attemptPlay = () => {
+                  video.currentTime = 0;
+                  video.muted = true;
+                  video
+                    .play()
+                    .then(() => {
+                      gsap.to(unmuteRef.current, { opacity: 1, duration: 0.3 });
+                      video.onended = () => {
+                        gsap.to(unmuteRef.current, {
+                          opacity: 0,
+                          duration: 0.3,
+                        });
+                        gsap.to(logoRevealRef.current, {
+                          opacity: 1,
+                          duration: 0.8,
+                          ease: "expo.out",
+                        });
+                      };
+                    })
+                    .catch((err) => console.error("play blocked:", err));
+                };
+
+                // readyState 4 = HAVE_ENOUGH_DATA (fully ready)
+                // readyState 3 = HAVE_FUTURE_DATA (enough to play)
+                if (video.readyState >= 3) {
+                  attemptPlay();
+                } else {
+                  // Not ready yet — wait for it
+                  video.addEventListener("canplay", attemptPlay, {
+                    once: true,
+                  });
+                }
+              },
+            },
             0.45,
           );
       }
@@ -160,19 +219,69 @@ export default function VoidSparkAbout() {
             </div>
           </div>
 
-          {/* Logo overlay — desktop only, hidden on mobile via CSS */}
+          {/* Logo/Video overlay — desktop only */}
           <div
             ref={logoWrapRef}
             className="absolute inset-0 items-center justify-center will-change-transform hidden lg:flex"
             style={{ opacity: 0 }}
           >
-            <a href="/services" ref={logoRef}>
-              <img
-                src={fullLogo.src}
-                alt="image"
-                className="w-150 object-contain lg:w-2xl"
-              />
-            </a>
+            <video
+              ref={logoRef}
+              src="/videos/Tugas-PKK-FINAL.mp4"
+              preload="auto"
+              muted
+              playsInline
+              loop={false}
+              className="w-[840px] object-contain rounded-2xl"
+            />
+
+            <button
+              ref={playBtnRef}
+              onClick={() => {
+                const video = logoRef.current;
+                if (!video) return;
+                if (video.paused) {
+                  video.muted = false;
+                  video.play();
+                  playBtnRef.current.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+          <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
+        </svg>
+        <span>Pause</span>
+      `;
+                } else {
+                  video.pause();
+                  playBtnRef.current.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+          <polygon points="5,3 19,12 5,21"/>
+        </svg>
+        <span>Play</span>
+      `;
+                }
+              }}
+              className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black text-white text-sm font-medium px-4 py-2.5 rounded-full cursor-pointer border border-white/20 shadow-lg"
+              style={{ opacity: 0 }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <polygon points="5,3 19,12 5,21" />
+              </svg>
+              <span>Play</span>
+            </button>
+
+            {/* Logo fades in after video ends */}
+            <img
+              ref={logoRevealRef}
+              src={fullLogo.src}
+              alt="VoidSpark"
+              className="absolute w-2xl object-contain"
+              style={{ opacity: 0 }}
+            />
           </div>
         </div>
       </div>
