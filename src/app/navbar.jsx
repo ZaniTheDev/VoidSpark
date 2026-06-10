@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 const navItems = [
   { label: "About us", href: "/#about" },
   { label: "Services", href: "/services" },
-  { label: "Our Team", href: "#" },
+  { label: "Our Work", href: "/Our-Projects" },
 ];
 
 // WhatsApp configuration
