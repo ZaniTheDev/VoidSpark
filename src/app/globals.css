@@ -3,6 +3,19 @@
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
+@keyframes va-float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+.va-image-float {
+  animation: va-float 4s ease-in-out infinite;
+}
 
 @theme inline {
   --color-background: var(--background);

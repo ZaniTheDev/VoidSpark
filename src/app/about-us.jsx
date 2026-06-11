@@ -18,7 +18,8 @@ export default function VoidSparkAbout() {
   const logoRevealRef = useRef(null);
   const playBtnRef = useRef(null);
   const videoStarted = useRef(false);
-  const unmuteRef = useRef(null);
+  const watchTextRef = useRef(null);
+  const videoWrapRef = useRef(null);
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -33,7 +34,10 @@ export default function VoidSparkAbout() {
       gsap.set(".va-image", { opacity: 0, scale: 0.96, y: 40 });
 
       if (isDesktop) {
-        gsap.set(logoWrapRef.current, { opacity: 0, scale: 0.85 });
+        gsap.set(logoWrapRef.current, { opacity: 1 });
+        gsap.set(videoWrapRef.current, { opacity: 0, scale: 0.92 });
+        gsap.set(watchTextRef.current, { opacity: 0, y: -20 });
+        gsap.set(playBtnRef.current, { opacity: 0 });
       }
 
       // ── SECTION ENTER ANIMATION ────────────────────────────────
@@ -52,25 +56,8 @@ export default function VoidSparkAbout() {
         .to(".va-eyebrow", { opacity: 1, y: 0, duration: 0.6 }, 0.2)
         .to(".va-headline", { yPercent: 0, duration: 1.1, stagger: 0.1 }, 0.35)
         .to(".va-body", { opacity: 1, y: 0, duration: 0.7 }, 0.6)
-        .to(
-          ".va-image",
-          {
-            opacity: 1,
-            scale: 1,
-            y: 0,
-            duration: 1.8,
-            onComplete: () => {
-              gsap.to(".va-image", {
-                y: -15,
-                duration: 2,
-                repeat: -1,
-                yoyo: true,
-                ease: "sine.inOut",
-              });
-            },
-          },
-          0.5,
-        );
+        // No onComplete float — handled by CSS animation class below
+        .to(".va-image", { opacity: 1, scale: 1, y: 0, duration: 1.8 }, 0.5);
 
       // ── PINNED SPLIT + VIDEO — DESKTOP ONLY ───────────────────
 
@@ -80,29 +67,50 @@ export default function VoidSparkAbout() {
             trigger: rootRef.current,
             start: "top top",
             end: "+=200%",
-            scrub: 1,
+            scrub: 0.5,
             pin: true,
             anticipatePin: 1,
             pinSpacing: true,
             onUpdate: (self) => {
-              if (self.progress >= 0.7 && !videoStarted.current) {
-                videoStarted.current = true;
-                // Just show the play button, don't auto-play
-                gsap.to(playBtnRef.current, { opacity: 1, duration: 0.4 });
-              }
-
-              if (self.progress < 0.5 && videoStarted.current) {
-                videoStarted.current = false;
+              if (self.progress < 0.6) {
                 const video = logoRef.current;
                 if (video) {
                   video.pause();
                   video.currentTime = 0;
                 }
                 gsap.set(playBtnRef.current, { opacity: 0 });
+                gsap.set(watchTextRef.current, { opacity: 0, y: -20 });
+                gsap.set(videoWrapRef.current, { opacity: 0, scale: 0.92 });
+                videoStarted.current = false;
+              }
+
+              // Show play button once video is visible
+              if (self.progress >= 0.85 && !videoStarted.current) {
+                videoStarted.current = true;
+                gsap.to(playBtnRef.current, { opacity: 1, duration: 0.3 });
+
+                const video = logoRef.current;
+                if (!video) return;
+                video.onended = () => {
+                  gsap.to(watchTextRef.current, { opacity: 0, duration: 0.3 });
+                  gsap.to(playBtnRef.current, { opacity: 0, duration: 0.3 });
+                  gsap.to(logoRevealRef.current, {
+                    opacity: 1,
+                    duration: 0.8,
+                    ease: "expo.out",
+                  });
+                  gsap.to(playBtnRef.current, { opacity: 0, duration: 0.3 });
+                  gsap.to(logoRevealRef.current, {
+                    opacity: 1,
+                    duration: 0.8,
+                    ease: "expo.out",
+                  });
+                };
               }
             },
           },
         });
+
         pinnedTl
           .to(
             leftPanelRef.current,
@@ -114,40 +122,16 @@ export default function VoidSparkAbout() {
             { xPercent: 120, opacity: 0, ease: "power2.in", duration: 0.4 },
             0,
           )
-          .to(
-            logoWrapRef.current,
-            {
-              opacity: 1,
-              scale: 1,
-              ease: "expo.out",
-              duration: 0.55,
-              onComplete: () => {
-                const video = logoRef.current;
-                if (!video) return;
-
-                // Just show the buttons, don't autoplay
-                gsap.to(unmuteRef.current, { opacity: 1, duration: 0.3 });
-                gsap.to(playBtnRef.current, { opacity: 1, duration: 0.3 });
-
-                // Set up the ended event handler for when user finishes playing
-                video.onended = () => {
-                  gsap.to(unmuteRef.current, {
-                    opacity: 0,
-                    duration: 0.3,
-                  });
-                  gsap.to(playBtnRef.current, {
-                    opacity: 0,
-                    duration: 0.3,
-                  });
-                  gsap.to(logoRevealRef.current, {
-                    opacity: 1,
-                    duration: 0.8,
-                    ease: "expo.out",
-                  });
-                };
-              },
-            },
+          .fromTo(
+            watchTextRef.current,
+            { opacity: 0, y: -20 },
+            { opacity: 1, y: 0, ease: "back.out(0.7)", duration: 0.4 },
             0.45,
+          )
+          .to(
+            videoWrapRef.current,
+            { opacity: 1, scale: 1, ease: "expo.out", duration: 0.55 },
+            0.75,
           );
       }
     }, rootRef);
@@ -170,26 +154,25 @@ export default function VoidSparkAbout() {
 
       <div className="relative z-10 mx-auto max-w-7xl w-full py-20 lg:py-0">
         <div ref={contentWrapRef} className="relative" id="about">
-          {/* Grid of two panels */}
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
-            {/* LEFT PANEL — text */}
+            {/* LEFT PANEL */}
             <div ref={leftPanelRef} className="will-change-transform">
-              <div className="va-ruler mb-8 h-px max-w-xl bg-neutral-300 will-change-transform" />
+              <div className="va-ruler mb-8 h-px max-w-xl bg-neutral-300" />
 
-              <div className="va-eyebrow mb-6 flex items-center gap-3 opacity-0 will-change-transform">
+              <div className="va-eyebrow mb-6 flex items-center gap-3">
                 <span className="h-2 w-2 rounded-full bg-neutral-900" />
                 <span className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
                   About Us
                 </span>
               </div>
 
-              <div className="va-headline text-6xl sm:text-7xl md:text-[4.5rem] font-semibold lg:w-4xl leading-[0.95] tracking-[-0.03em] text-neutral-900 will-change-transform">
+              <div className="va-headline text-6xl sm:text-7xl md:text-[4.5rem] font-semibold lg:w-4xl leading-[0.95] tracking-[-0.03em] text-neutral-900">
                 Refuse to be
                 <br />
                 <span className="text-neutral-400">Ordinary!</span>
               </div>
 
-              <p className="va-body mt-4 max-w-lg text-base font-light leading-relaxed text-neutral-600 opacity-0 will-change-transform sm:text-lg lg:w-3xl lg:mt-4">
+              <p className="va-body mt-4 max-w-lg text-base font-light leading-relaxed text-neutral-600 sm:text-lg lg:w-3xl lg:mt-4">
                 Kami menyadari bahwa ada banyak sekali orang di era modern ini
                 yang membutuhkan Personal Branding dengan alasan yang berbeda
                 mungkin untuk mempromosikan diri sendiri, atau untuk
@@ -199,63 +182,80 @@ export default function VoidSparkAbout() {
               </p>
             </div>
 
-            {/* RIGHT PANEL — image */}
+            {/* RIGHT PANEL */}
             <div ref={rightPanelRef} className="flex will-change-transform">
               <img
                 src={murifaiy.src}
                 alt="image"
-                className="va-image object-contain w-80 mx-auto block lg:w-200"
+                className="va-image va-image-float object-contain w-80 mx-auto block lg:w-200"
               />
             </div>
           </div>
 
-          {/* Logo/Video overlay — desktop only */}
+          {/* Video overlay — desktop only */}
           <div
             ref={logoWrapRef}
-            className="absolute inset-0 items-center justify-center will-change-transform hidden lg:flex"
+            className="absolute inset-0 items-center justify-center hidden lg:flex"
             style={{ opacity: 0 }}
           >
-            <video
-              ref={logoRef}
-              src="/videos/Tugas-PKK-FINAL.mp4"
-              preload="auto"
-              muted
-              playsInline
-              className="w-[740px] object-contain rounded-2xl"
-            />
+            <div className="absolute top-1 left-0 right-0 text-center pointer-events-none z-20 border-black">
+              <p
+                ref={watchTextRef}
+                className="text-2xl sm:text-7xl md:text-[2.5rem] font-semibold leading-[0.95] tracking-[-0.10 em] text-neutral-900 mb-12"
+                style={{ opacity: 0 }}
+              >
+                Watch the Video Below!
+              </p>
+            </div>
+
+            <div ref={videoWrapRef} style={{ opacity: 0 }}>
+              <video
+                ref={logoRef}
+                src="/videos/Tugas-PKK-FINAL.mp4"
+                preload="metadata"
+                muted
+                playsInline
+                className="w-[740px] object-contain rounded-2xl"
+              />
+            </div>
 
             <button
               ref={playBtnRef}
               onClick={() => {
                 const video = logoRef.current;
                 if (!video) return;
-
                 if (video.paused) {
-                  // Unmute and play
                   video.muted = false;
                   video
                     .play()
-                    .then(() => {
-                      // Video is playing
-                      playBtnRef.current.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-              <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
-            </svg>
-            <span>Pause</span>
-          `;
-                      // Hide unmute button since video is already unmuted
-                      gsap.to(unmuteRef.current, { opacity: 0, duration: 0.3 });
-                    })
                     .catch((err) => console.error("play failed:", err));
-                } else {
-                  // Pause the video
-                  video.pause();
+                  gsap.to(watchTextRef.current, {
+                    opacity: 0,
+                    y: -10,
+                    duration: 0.3,
+                  });
+                  playBtnRef.current.innerHTML = `...`;
                   playBtnRef.current.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-          <polygon points="5,3 19,12 5,21"/>
-        </svg>
-        <span>Play</span>
-      `;
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                      <rect x="6" y="4" width="4" height="16"/>
+                      <rect x="14" y="4" width="4" height="16"/>
+                    </svg>
+                    <span>Pause</span>
+                  `;
+                } else {
+                  video.pause();
+                  gsap.to(watchTextRef.current, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.3,
+                  });
+                  playBtnRef.current.innerHTML = `...`;
+                  playBtnRef.current.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                      <polygon points="5,3 19,12 5,21"/>
+                    </svg>
+                    <span>Play</span>
+                  `;
                 }
               }}
               className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black text-white text-sm font-medium px-4 py-2.5 rounded-full cursor-pointer border border-white/20 shadow-lg"
@@ -272,7 +272,6 @@ export default function VoidSparkAbout() {
               </svg>
               <span>Play</span>
             </button>
-            {/* Logo fades in after video ends */}
           </div>
         </div>
       </div>
